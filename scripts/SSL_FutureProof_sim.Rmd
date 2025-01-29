@@ -175,7 +175,6 @@ getP <- nimbleFunction(
 
 ```
 
-
 ```{r scenarios and parameters}
 
 scenario <- 1 #1-45
@@ -184,14 +183,9 @@ nsim <- 29
 thresh_small <- c(0.15, 0.1, 0.1, 0.05, 0.025)
 thresh_big <- c(0.2, 0.15, 0.15, 0.1, 0.05)
 
-# odd-numbered batches
 batch <- 1
 thresh <- thresh_small
 v_thresh <- 'small_decrease'
-
-# even-numbered batches
-# thresh <- thresh_big
-# v_thresh <- 'big_decrease'
 
 n.states <- 12
 n.obs <- 12
@@ -310,18 +304,6 @@ phi.pars.t <- data.frame(phiP = rlogitnorm(n.occasions-1, qlogis(phi.pars[1]-(ph
                          phiA = rlogitnorm(n.occasions-1, qlogis(phi.pars[5]-(phi.pars[5]*thresh[5])), 
                                            eDPS_ests['sigmaA', 'med']))
 
-#increase in survival scenarios: didn't end up pursuing these
-# phi.pars.t <- data.frame(phiP = rlogitnorm(n.occasions-1, qlogis(phi.pars[1]+(phi.pars[1]*thresh[1])), 
-#                                            eDPS_ests['sigmaP', 'med']),
-#                          phi1 = rlogitnorm(n.occasions-1, qlogis(phi.pars[2]+(phi.pars[2]*thresh[2])), 
-#                                            eDPS_ests['sigma1', 'med']),
-#                          phi2 = rlogitnorm(n.occasions-1, qlogis(phi.pars[3]+(phi.pars[3]*thresh[3])), 
-#                                            eDPS_ests['sigma2', 'med']),
-#                          phiJ = rlogitnorm(n.occasions-1, qlogis(phi.pars[4]+(phi.pars[4]*thresh[4])), 
-#                                            eDPS_ests['sigmaJ', 'med']),
-#                          phiA = rlogitnorm(n.occasions-1, qlogis(phi.pars[5]+(phi.pars[5]*thresh[5])), 
-#                                            eDPS_ests['sigmaA', 'med']))
-
 # 1. State process matrix
 totrel <- sum(marked)*(n.occasions-1)
 STATE <- array(NA, dim=c(n.states, n.states, totrel, n.occasions-1))
@@ -428,11 +410,6 @@ SSL_CJS <- nimbleCode({
       logit(phi9[i,t]) <- mu.A + epsA[t]
       logit(phiA[i,t]) <- mu.A + epsA[t]
     } #t 
-    
-    # for (t in 11:(n.occasions-1)) {  
-    #   logit(phiA[i,t]) <- mu.A + epsA[t]
-    # } #t 
-    
   } #ind
 
     
@@ -561,7 +538,6 @@ params <- c('int.phiP', 'int.phi1', 'int.phi2', 'int.phiJ', 'int.phiA',
             'mean.phiP.5', 'mean.phi1.5', 'mean.phi2.5', 'mean.phiJ.5', 'mean.phiA.5')
 
 ### run model
-# n.iter = 3500; n.chains = 3; n.burnin = 2000; nthin = 3; nAdapt = 20
 n.iter = 20000; n.chains = 3; n.burnin = 10000; nthin = 3; nAdapt = 20
 
 Rmodel <- nimbleModel(code = SSL_CJS, 
@@ -656,34 +632,21 @@ colnames(cv) <- phi.pars.names
 } #simulations
 
 # save output
-saveRDS(bias, file = here::here('results', 'simpleAge', 'sims',
-                                paste('S.', scenario, '_bias', batch, '.rds', sep = '')))
-saveRDS(out_median, file = here::here('results', 'simpleAge', 'sims', 
-                                      paste('S.', scenario,  '_median', batch, '.rds', sep = '')))
-saveRDS(cv, file = here::here('results', 'simpleAge', 'sims', 
-                                      paste('S.', scenario,  '_cv', batch, '.rds', sep = '')))
-saveRDS(rmse, file = here::here('results', 'simpleAge', 'sims',  
-                                      paste('S.', scenario,  '_rmse', batch, '.rds', sep = '')))
-
-#odd-numbered batches
-saveRDS(dec_little10, file = here::here('results', 'simpleAge', 'sims',
-                                      paste('S.', scenario,  '_dec_little10_', batch, '.rds', sep = '')))
-saveRDS(dec_little5, file = here::here('results', 'simpleAge', 'sims',
-                                      paste('S.', scenario,  '_dec_little5_', batch, '.rds', sep = '')))
-
-#even-numbered batches
-#these are the same, just different true values, so used same calculation
-# dec_big5 <- dec_little5
-# dec_big10 <- dec_little10
+# saveRDS(bias, file = here::here('results', 'simpleAge', 'sims',
+#                                 paste('S.', scenario, '_bias', batch, '.rds', sep = '')))
+# saveRDS(out_median, file = here::here('results', 'simpleAge', 'sims', 
+#                                       paste('S.', scenario,  '_median', batch, '.rds', sep = '')))
+# saveRDS(cv, file = here::here('results', 'simpleAge', 'sims', 
+#                                       paste('S.', scenario,  '_cv', batch, '.rds', sep = '')))
+# saveRDS(rmse, file = here::here('results', 'simpleAge', 'sims',  
+#                                       paste('S.', scenario,  '_rmse', batch, '.rds', sep = '')))
+# saveRDS(dec_little10, file = here::here('results', 'simpleAge', 'sims',
+#                                       paste('S.', scenario,  '_dec_little10_', batch, '.rds', sep = '')))
+# saveRDS(dec_little5, file = here::here('results', 'simpleAge', 'sims',
+#                                       paste('S.', scenario,  '_dec_little5_', batch, '.rds', sep = '')))
 # 
-# saveRDS(dec_big10, file = here::here('results', 'simpleAge', 'sims',
-#                                       paste('S.', scenario,  '_dec_big10_', batch, '.rds', sep = '')))
-# saveRDS(dec_big5, file = here::here('results', 'simpleAge', 'sims',
-#                                       paste('S.', scenario,  '_dec_big5_', batch, '.rds', sep = '')))
-
-
-saveRDS(out, file = here::here('results', 'simpleAge', 'sims',
-                               paste('S.', scenario, '_chains', batch, '.rds', sep = '')))
+# saveRDS(out, file = here::here('results', 'simpleAge', 'sims',
+#                                paste('S.', scenario, '_chains', batch, '.rds', sep = '')))
 
 
 
